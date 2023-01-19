@@ -1,0 +1,6 @@
+Tutorial from internetingishard.com.
+This  is a basic introduction to web developing. Defines and summarizes web structure.
+Introduces tools necessary to start learn like code editor and browser.
+Also makes emphasis on HTML and CSS only.
+
+Addition to this tutorial will be commited in github.
