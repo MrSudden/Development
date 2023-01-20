@@ -80,3 +80,11 @@ a:visited:active {
 .call-to-action:visited:active {
     background-color: #EEB75A;      /* Yellow */
 }
+
+p:last-of-type {
+    margin-bottom: 50px;
+}
+
+#button-2 {
+    color: #5D6063;                 /* Dark gray */
+}
