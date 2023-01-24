@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Submission</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="speaker-form-header">
+        <h1>Speaker Submission</h1>
+        <p><em>Want to speak at our fake conference? Fill out this form.</em></p>
+    </header>
+    <form action="" method="get">
+        <div class="form-row">
+            <label for="full-name">Name</label>
+            <input id="full-name" name="full-name" type="text">
+        </div>
+        <div class="form-row">
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" placeholder="joe@example.com">
+        </div>
+        <fieldset class="legacy-form-row">
+            <legend>Type of Talk</legend>
+            <input type="radio" name="talk-type" id="talk-type-1" value="main-stage">
+            <label for="talk-type-1" class="radio-label">Main Stage</label>
+            <input type="radio" name="talk-type" id="talk-type-2" value="workshop" checked>
+            <label for="talk-type-2" class="radio-label">Workshop</label>
+        </fieldset>
+        <div class="form-row">
+            <label for="t-shirt">T-Shirt Size</label>
+            <select name="t-shirt" id="t-shirt">
+                <option value="xs">Extra Small</option>
+                <option value="s">Small</option>
+                <option value="m">Medium</option>
+                <option value="l">Large</option>
+                <option value="xl">Extera Large</option>
+            </select>
+        </div>
+    </form>
+</body>
+</html>
