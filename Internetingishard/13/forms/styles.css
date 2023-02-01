@@ -74,6 +74,27 @@ body {
     font-size: 14px;
 }
 
+.form-row textarea {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    border: 1px solid #D6D9DC;          /* Light sky blue */
+    border-radius: 3px;
+    min-height: 200px;
+    margin-bottom: 10px;
+    padding: 7px;
+    resize: none;
+}
+
+.form-row .instructions {
+    color: #999999;                     /* Medium gray */
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+.form-row .checkbox-label {
+    margin-bottom: 0;
+}
+
 .legacy-form-row {
     border: none;
     margin-bottom: 20px;
@@ -98,18 +119,27 @@ body {
     float: left;
 }
 
-/* Mobile Styles */
-@media only screen and (max-width: 425px) {
-    
+.form-row button {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #5995DA;      /* Medium blue */
+    border: none;
+    border-radius: 3px;
+    padding: 10px 40px;
+    cursor: pointer;
 }
 
-/* Tablet Styles */
-@media only screen and (min-width: 426px) and (max-width: 960px) {
-    
+.form-row button:hover {
+    background-color: #76AEED;      /* Medium blue */
+}
+
+.form-row button:active {
+    background-color: #407FC7;      /* Sea blue */
 }
 
 /* Desktop Styles */
-@media only screen and (min-width: 961px) {
+@media only screen and (min-width: 700px) {
     .speaker-form-header,
     .speaker-form {
         width: 600px;
@@ -136,6 +166,11 @@ body {
         padding-right: 20px;
     }
 
+    .form-row .checkbox-label {
+        margin-left: 120px;
+        width: auto;
+    }
+
     .legacy-form-row {
         margin-bottom: 10px;
     }
@@ -144,6 +179,17 @@ body {
         width: 120px;
         text-align: right;
         padding-right: 20px;
+    }
+
+    .legacy-form-row legend {
         float: left;
+    }
+
+    .form-row .instructions {
+        margin-left: 120px;
+    }
+
+    .form-row button {
+        margin-left: 120px;
     }
 }
