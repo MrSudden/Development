@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Alignment</title>
+    <link rel="stylesheet" href="typo.css">
+    <style>
+        .left {
+            text-align: left;
+        }
+
+        .justify {
+            text-align: justify;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="web-fonts.html">Web Fonts</a></li>
+                <li><a href="history.html">History</a></li>
+                <li><a href="indents.html">Indents</a></li>
+                <li class="selected">Alignment</li>
+                <li><a href="spacing.html">Spacing</a></li>
+                <li><a href="line-length.html">Line Length</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="hero">
+        <h1>Text Alignment</h1>
+    </div>
+    <div class="page">
+        <section class="section section-gray left">
+            <h2>Left Alignment</h2>
+            <p>Center-aligned text doesn&rsquo;t have that anchor, so it&rsquo;s easier for the eye to get lost when it tries to jump to the next line. Reserve it for special kinds of content, like poems, lyrics, and headings.</p>
+        </section>
+        <section class="section section-gray">
+            <h2>Right Alignment</h2>
+            <p>Only use right-aligned text when it makes sense for the layout. For example, a caption for an image:</p>
+            <figure>
+                <figcaption>These letters are touching. This is called a ligature.</figcaption>
+                <img src="ligature.svg">
+            </figure>
+            <p>Of course, if you&rsquo;re publishing content in a language that&rsquo;s read right-to-left, that&rsquo;s another story...</p>
+        </section>
+        <section class="section section-gray justify">
+            <h2>Justified Alignment</h2>
+            <p>Justified text requires a good hyphenation engine. Without an intelligent way to split long words across lines, you get big spaces between words, which makes it harder to scan the text. Most browsers don&rsquo;t have good built-in hyphenation engines.</p>
+        </section>
+    </div>
+</body>
+</html>
