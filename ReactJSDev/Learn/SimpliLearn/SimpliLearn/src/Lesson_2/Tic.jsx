@@ -64,31 +64,13 @@ function Game() {
         setCurrentMove(nextHistory.length - 1);
     }
 
-    function jumpTo(nextMove) {
-        setCurrentMove(nextMove);
-    }
-
-    const moves = history.map((squares, move) => {
-        let description;
-        if (move > 0) {
-            description = 'Go to move #' + move;
-        } else {
-            description = 'Go to game start';
-        }
-        return (
-            <li key={move}>
-                <button className="text-sm w-5/6" onClick={() => jumpTo(move)}>{description}</button>
-            </li>
-        );
-    });
-
     return (
         <div className="flex flex-row w-auto h-auto p-0">
             <div className="w-48">
                 <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
             </div>
             <div className="w-48">
-                <ol>{moves}</ol>
+                <p>You are at move #{curentMove}</p>
             </div>
         </div>
     );
