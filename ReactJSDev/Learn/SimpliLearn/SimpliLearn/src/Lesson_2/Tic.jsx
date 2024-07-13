@@ -1,5 +1,5 @@
 import { PropTypes } from 'prop-types';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
 function Square({ value, onSquareClick }) {
     return <button className='text-2xl text-center w-16 h-16 p-0' onClick={onSquareClick}>{value}</button>
@@ -35,13 +35,15 @@ function Board({ xIsNext, squares, onPlay }) {
             const index = i * 3 + j;
             rowSquares.push(<Square value={squares[index]} onSquareClick={() => handleClick(index)}/>);
         }
-        rows.push(<div className="flex flex-row">{rowSquares}</div>);
+        rows.push(<div className="flex flex-row">
+            {rowSquares.map((square, index) => (<Fragment key={index}>{square}</Fragment>))}
+        </div>);
     }
 
     return (
         <>
             <div className="text-center text-2xl">{status}</div>
-            {rows}
+            {rows.map((row, index) => (<Fragment key={index}>{row}</Fragment>))}
         </>
     );
 }
@@ -55,6 +57,7 @@ Board.propTypes = {
 function Game() {
     const [history, setHistory] = useState([Array(9).fill(null)]);
     const [curentMove, setCurrentMove] = useState(0);
+    const [ascending, setAscending] = useState(false);
     const xIsNext = curentMove % 2 === 0;
     const currentSquares = history[curentMove];
 
@@ -64,13 +67,37 @@ function Game() {
         setCurrentMove(nextHistory.length - 1);
     }
 
+    function handleSort() {
+        setAscending(!ascending);
+    }
+
+    const moves = history.map((squares, move) => {
+        let description;
+        if (move > 0) {
+            description = 'Go to move #' + move;
+        } else {
+            description = 'Go to game start';
+        }
+        return (
+            <li key={move}>
+                <button onClick={() => setCurrentMove(move)}>{description}</button>
+            </li>
+        );
+    });
+
+    if (ascending) {
+        moves.reverse();
+    }
+
     return (
         <div className="flex flex-row w-auto h-auto p-0">
             <div className="w-48">
                 <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
             </div>
-            <div className="w-48">
-                <p>You are at move #{curentMove}</p>
+            <div className="text-sm w-48">
+                <p className="font-medium">You are at move #{curentMove}</p>
+                <button onClick={handleSort}>Sort</button>
+                <ol>{moves}</ol>
             </div>
         </div>
     );
