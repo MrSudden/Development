@@ -23,7 +23,6 @@ function Board({ xIsNext, squares, onPlay }) {
     }
 
     let status;
-    console.log("Winner:", winner, "Line:", line)
     if (winner) {
         status = winner === 'Draw' ? 'Draw' : 'Winner: ' + winner;
     } else {
@@ -64,13 +63,13 @@ Board.propTypes = {
 
 function Game() {
     const [history, setHistory] = useState([Array(9).fill(null)]);
-    const [curentMove, setCurrentMove] = useState(0);
+    const [currentMove, setCurrentMove] = useState(0);
     const [ascending, setAscending] = useState(false);
-    const xIsNext = curentMove % 2 === 0;
-    const currentSquares = history[curentMove];
+    const xIsNext = currentMove % 2 === 0;
+    const currentSquares = history[currentMove];
 
     function handlePlay(nextSquares) {
-        const nextHistory = [...history.slice(0, curentMove + 1), nextSquares];
+        const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
         setHistory(nextHistory);
         setCurrentMove(nextHistory.length - 1);
     }
@@ -79,10 +78,20 @@ function Game() {
         setAscending(!ascending);
     }
 
+    function getRowCol(index) {
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+        return `(${row}, ${col})`;
+    }
+
+
     const moves = history.map((squares, move) => {
         let description;
         if (move > 0) {
-            description = 'Go to move #' + move;
+            const lastMove = history[move - 1];
+            const currentMove = squares;
+            const diffIndex = currentMove.findIndex((value, index) => value !== lastMove[index]);
+            description = `Go to move #${move} ${getRowCol(diffIndex)}`;
         } else {
             description = 'Go to game start';
         }
@@ -103,7 +112,7 @@ function Game() {
                 <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
             </div>
             <div className="text-sm w-48">
-                <p className="font-medium">You are at move #{curentMove}</p>
+                <p className="font-medium">You are at move #{currentMove}</p>
                 <button onClick={handleSort}>Sort</button>
                 <ol>{moves}</ol>
             </div>
