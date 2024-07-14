@@ -1,29 +1,31 @@
 import { PropTypes } from 'prop-types';
 import { Fragment, useState } from 'react';
 
-function Square({ value, onSquareClick }) {
-    return <button className='text-2xl text-center w-16 h-16 p-0' onClick={onSquareClick}>{value}</button>
+function Square({ value, className, onSquareClick }) {
+    return <button className={`${className} text-2xl text-center w-16 h-16 p-0`} onClick={onSquareClick}>{value}</button>
 }
 
 Square.propTypes = {
     value: PropTypes.string,
+    className: PropTypes.string,
     onSquareClick: PropTypes.func.isRequired
 }
 
 function Board({ xIsNext, squares, onPlay }) {
+    const { winner, line } = calculateWinner(squares);
     function handleClick(i) {
-        if (calculateWinner(squares) || (squares[i] !== null)) {
+        if (winner || squares[i] !== null) {
             return;
         }
         const newSquares = squares.slice();
-        (xIsNext) ? newSquares[i] = 'X' : newSquares[i] = 'O';
+        newSquares[i] = xIsNext ? 'X' : 'O';
         onPlay(newSquares);
     }
 
-    const winner = calculateWinner(squares);
     let status;
+    console.log("Winner:", winner, "Line:", line)
     if (winner) {
-        status = 'Winner: ' + winner;
+        status = winner === 'Draw' ? 'Draw' : 'Winner: ' + winner;
     } else {
         status = 'Next player: ' + (xIsNext ? 'X' : 'O');
     }
@@ -33,11 +35,17 @@ function Board({ xIsNext, squares, onPlay }) {
         const rowSquares = [];
         for (let j = 0; j < 3; j++) {
             const index = i * 3 + j;
-            rowSquares.push(<Square value={squares[index]} onSquareClick={() => handleClick(index)}/>);
+            if (line.includes(index)) {
+                rowSquares.push(<Square value={squares[index]} className="bg-lime-300" onSquareClick={() => handleClick(index)}/>);
+            } else {
+                rowSquares.push(<Square value={squares[index]} onSquareClick={() => handleClick(index)}/>);
+            }
         }
-        rows.push(<div className="flex flex-row">
-            {rowSquares.map((square, index) => (<Fragment key={index}>{square}</Fragment>))}
-        </div>);
+        rows.push(
+            <div className="flex flex-row">
+                {rowSquares.map((square, index) => (<Fragment key={index}>{square}</Fragment>))}
+            </div>
+        );
     }
 
     return (
@@ -119,8 +127,11 @@ function calculateWinner(squares) {
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+            return { winner: squares[a], line: lines[i] };
         }
     }
-    return null;
+    if (squares.every(square => square !== null)) {
+        return { winner: 'Draw', line: [] };
+    }
+    return { winner: null, line: [] };
 }
