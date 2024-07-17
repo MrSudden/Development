@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { PropTypes } from 'prop-types';
 import PRODUCTS from "./data";
 
@@ -26,11 +27,17 @@ ProductRow.propTypes = {
     product: PropTypes.object.isRequired
 }
 
-function ProductTable({ PRODUCTS }) {
+function ProductTable({ PRODUCTS, filterText, onlyInStock }) {
     const header = ["Name", "Price"]
     const rows = [];
     let lastCategory = null;
-    PRODUCTS.forEach(product => {
+    PRODUCTS.forEach((product) => {
+        if (filterText && !product.name.toLowerCase().includes(filterText.toLowerCase())) {
+            return;
+        }
+        if (onlyInStock && !product.stocked) {
+            return;
+        }
         if (product.category !== lastCategory) {
             rows.push(<ProductCategoryRow category={product.category} key={product.category} />);
         }
@@ -53,28 +60,46 @@ function ProductTable({ PRODUCTS }) {
 }
 
 ProductTable.propTypes = {
-    PRODUCTS: PropTypes.arrayOf(PropTypes.object).isRequired
+    PRODUCTS: PropTypes.arrayOf(PropTypes.object).isRequired,
+    filterText: PropTypes.string,
+    onlyInStock: PropTypes.bool
 }
 
-function SearchBar() {
+function SearchBar({ filterText, onlyInStock, onFilterTextChange, onOnlyInStockChange }) {
+    const handleFilterTextChange = (event) => {
+        onFilterTextChange(event.target.value);
+    }
+    const handleOnlyInStockChange = (event) => {
+        onOnlyInStockChange(event.target.checked);
+    }
+
     return (
         <form className="flex flex-col w-96">
-            <input id="filterText" className="border-2 border-zinc-300 rounded" type="text" placeholder="Search..." /> {/* Add id or name attribute to form field element */}
-            <p className="flex">
-                <input id="onlyInStock" className='mr-2' type="checkbox" />
+            <input id="filterText" className="border-2 border-zinc-300 rounded" type="text" placeholder="Search..." value={filterText} onChange={handleFilterTextChange} />
+            <label className="flex">
+                <input id="onlyInStock" className='mr-2' type="checkbox" checked={onlyInStock} onChange={handleOnlyInStockChange} />
                 Only show products in stock
-            </p>
+            </label>
         </form>
     );
 }
 
-function FilterableProductTable() {
+SearchBar.propTypes = {
+    filterText: PropTypes.string,
+    onlyInStock: PropTypes.bool,
+    onFilterTextChange: PropTypes.func,
+    onOnlyInStockChange: PropTypes.func
+}
 
+function FilterableProductTable() {
+    const [onlyInStock, setOnlyInStock] = useState(false);
+    const [filterText, setFilterText] = useState('');
+    
     return (
         <div className="flex flex-col">
             <h1 className="text-xl font-bold mb-3">Product Table</h1>
-            <SearchBar />
-            <ProductTable PRODUCTS={PRODUCTS} />
+            <SearchBar filterText={filterText} onlyInStock={onlyInStock} onFilterTextChange={setFilterText} onOnlyInStockChange={setOnlyInStock} />
+            <ProductTable PRODUCTS={PRODUCTS} filterText={filterText} onlyInStock={onlyInStock} />
         </div>
     );
 }
