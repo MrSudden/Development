@@ -1,51 +1,56 @@
 import { PropTypes } from 'prop-types';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 
-function Square({ value, onSquareClick }) {
-    return <button className='text-2xl text-center w-16 h-16 p-0' onClick={onSquareClick}>{value}</button>
+function Square({ value, className, onSquareClick }) {
+    return <button className={`${className} text-2xl text-center w-16 h-16 p-0`} onClick={onSquareClick}>{value}</button>
 }
 
 Square.propTypes = {
     value: PropTypes.string,
+    className: PropTypes.string,
     onSquareClick: PropTypes.func.isRequired
 }
 
 function Board({ xIsNext, squares, onPlay }) {
+    const { winner, line } = calculateWinner(squares);
     function handleClick(i) {
-        if (calculateWinner(squares) || (squares[i] !== null)) {
+        if (winner || squares[i] !== null) {
             return;
         }
         const newSquares = squares.slice();
-        (xIsNext) ? newSquares[i] = 'X' : newSquares[i] = 'O';
+        newSquares[i] = xIsNext ? 'X' : 'O';
         onPlay(newSquares);
     }
 
-    const winner = calculateWinner(squares);
     let status;
     if (winner) {
-        status = 'Winner: ' + winner;
+        status = winner === 'Draw' ? 'Draw' : 'Winner: ' + winner;
     } else {
         status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+    }
+
+    const rows = [];
+    for (let i = 0; i < 3; i++) {
+        const rowSquares = [];
+        for (let j = 0; j < 3; j++) {
+            const index = i * 3 + j;
+            if (line.includes(index)) {
+                rowSquares.push(<Square value={squares[index]} className="bg-lime-300" onSquareClick={() => handleClick(index)}/>);
+            } else {
+                rowSquares.push(<Square value={squares[index]} onSquareClick={() => handleClick(index)}/>);
+            }
+        }
+        rows.push(
+            <div className="flex flex-row">
+                {rowSquares.map((square, index) => (<Fragment key={index}>{square}</Fragment>))}
+            </div>
+        );
     }
 
     return (
         <>
             <div className="text-center text-2xl">{status}</div>
-            <div className="flex flex-row">
-                <Square value={squares[0]} onSquareClick={() => handleClick(0)}/>
-                <Square value={squares[1]} onSquareClick={() => handleClick(1)}/>
-                <Square value={squares[2]} onSquareClick={() => handleClick(2)}/>
-            </div>
-            <div className="flex flex-row">
-                <Square value={squares[3]} onSquareClick={() => handleClick(3)}/>
-                <Square value={squares[4]} onSquareClick={() => handleClick(4)}/>
-                <Square value={squares[5]} onSquareClick={() => handleClick(5)}/>
-            </div>
-            <div className="flex flex-row">
-                <Square value={squares[6]} onSquareClick={() => handleClick(6)}/>
-                <Square value={squares[7]} onSquareClick={() => handleClick(7)}/>
-                <Square value={squares[8]} onSquareClick={() => handleClick(8)}/>
-            </div>
+            {rows.map((row, index) => (<Fragment key={index}>{row}</Fragment>))}
         </>
     );
 }
@@ -58,40 +63,57 @@ Board.propTypes = {
 
 function Game() {
     const [history, setHistory] = useState([Array(9).fill(null)]);
-    const [curentMove, setCurrentMove] = useState(0);
-    const xIsNext = curentMove % 2 === 0;
-    const currentSquares = history[curentMove];
+    const [currentMove, setCurrentMove] = useState(0);
+    const [ascending, setAscending] = useState(false);
+    const xIsNext = currentMove % 2 === 0;
+    const currentSquares = history[currentMove];
 
     function handlePlay(nextSquares) {
-        const nextHistory = [...history.slice(0, curentMove + 1), nextSquares];
+        const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
         setHistory(nextHistory);
         setCurrentMove(nextHistory.length - 1);
     }
 
-    function jumpTo(nextMove) {
-        setCurrentMove(nextMove);
+    function handleSort() {
+        setAscending(!ascending);
     }
+
+    function getRowCol(index) {
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+        return `(${row}, ${col})`;
+    }
+
 
     const moves = history.map((squares, move) => {
         let description;
         if (move > 0) {
-            description = 'Go to move #' + move;
+            const lastMove = history[move - 1];
+            const currentMove = squares;
+            const diffIndex = currentMove.findIndex((value, index) => value !== lastMove[index]);
+            description = `Go to move #${move} ${getRowCol(diffIndex)}`;
         } else {
             description = 'Go to game start';
         }
         return (
             <li key={move}>
-                <button className="text-sm w-5/6" onClick={() => jumpTo(move)}>{description}</button>
+                <button onClick={() => setCurrentMove(move)}>{description}</button>
             </li>
         );
     });
+
+    if (ascending) {
+        moves.reverse();
+    }
 
     return (
         <div className="flex flex-row w-auto h-auto p-0">
             <div className="w-48">
                 <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay}/>
             </div>
-            <div className="w-48">
+            <div className="text-sm w-48">
+                <p className="font-medium">You are at move #{currentMove}</p>
+                <button onClick={handleSort}>Sort</button>
                 <ol>{moves}</ol>
             </div>
         </div>
@@ -114,8 +136,11 @@ function calculateWinner(squares) {
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+            return { winner: squares[a], line: lines[i] };
         }
     }
-    return null;
+    if (squares.every(square => square !== null)) {
+        return { winner: 'Draw', line: [] };
+    }
+    return { winner: null, line: [] };
 }
