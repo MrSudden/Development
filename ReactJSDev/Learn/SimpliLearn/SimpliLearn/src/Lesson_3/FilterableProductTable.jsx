@@ -41,13 +41,18 @@ ProductRowMultiColumn.propTypes = {
     product: PropTypes.object.isRequired
 }
 
-function ProductTable({ header, products }) {
+function ProductTable({ header, products, sortColumn, sortDirection, handleSort }) {
     return (
         <>
             <table className={`flex flex-col w-${48 * header.length}`}>
                 <thead className="flex flex-row font-bold bg-zinc-200">
                     <tr>
-                        {header.map((head, index) => (<th className="w-48" key={index}>{head}</th>))}
+                        {header.map((head, index) => (<th className="w-48 cursor-pointer" key={index} onClick={() => handleSort(head.toLowerCase())}>
+                            {head}
+                            {sortColumn === head.toLowerCase() && (
+                                <span>{sortDirection === 'asc' ? ' ⬆️' : ' ⬇️'}</span>
+                            )}
+                        </th>))}
                     </tr>
                 </thead>
                 <tbody>
@@ -60,24 +65,47 @@ function ProductTable({ header, products }) {
 
 ProductTable.propTypes = {
     header: PropTypes.arrayOf(PropTypes.string).isRequired,
-    products: PropTypes.object.isRequired
+    products: PropTypes.object.isRequired,
+    sortColumn: PropTypes.string.isRequired,
+    sortDirection: PropTypes.string.isRequired,
+    handleSort: PropTypes.func.isRequired
 }
 
-function ProductCategoryTableData({ PRODUCTS, filterText, onlyInStock }) {
+function ProductCategoryTableData({ PRODUCTS, filterText, onlyInStock, sortColumn, sortDirection }) {
     const rows = [];
-    let lastCategory = null;
-    PRODUCTS.forEach((product) => {
+    const categoriesAdded = {};
+    
+    const sortedProducts = sortColumn
+    ? [...PRODUCTS].sort((a, b) => {
+          let aValue = a[sortColumn];
+          let bValue = b[sortColumn];
+
+          if (sortColumn !== 'price') {
+              if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+              if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+              return 0;
+          }
+
+          aValue = parseInt(aValue.match(/\d/g), 10);
+          bValue = parseInt(bValue.match(/\d/g), 10);
+          return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      })
+    : PRODUCTS;
+
+    sortedProducts.forEach((product) => {
         if (filterText && !product.name.toLowerCase().includes(filterText.toLowerCase())) {
             return;
         }
         if (onlyInStock && !product.stocked) {
             return;
         }
-        if (product.category !== lastCategory) {
+        if (!categoriesAdded[product.category]) {
             rows.push(<ProductCategoryRow category={product.category} key={product.category} />);
+            categoriesAdded[product.category] = true;
+            rows.push(...sortedProducts.filter(p => p.category === product.category)            
+            .filter(p => !filterText || p.name.toLowerCase().includes(filterText.toLowerCase()))
+            .filter(p => !onlyInStock || p.stocked).map(p => <ProductRow product={p} key={p.name} />));
         }
-        rows.push(<ProductRow product={product} key={product.name} />);
-        lastCategory = product.category;
     });
 
     return rows;
@@ -86,10 +114,12 @@ function ProductCategoryTableData({ PRODUCTS, filterText, onlyInStock }) {
 ProductCategoryTableData.propTypes = {
     PRODUCTS: PropTypes.arrayOf(PropTypes.object).isRequired,
     filterText: PropTypes.string,
-    onlyInStock: PropTypes.bool
+    onlyInStock: PropTypes.bool,
+    sortColumn: PropTypes.string,
+    sortDirection: PropTypes.string
 }
 
-function ProductPaginationTableData({ PRODUCTS, filterText, onlyInStock }) {
+function ProductPaginationTableData({ PRODUCTS, filterText, onlyInStock, sortColumn, sortDirection }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 9;
     const totalPages = Math.ceil(PRODUCTS.length / itemsPerPage);
@@ -150,10 +180,28 @@ function ProductPaginationTableData({ PRODUCTS, filterText, onlyInStock }) {
 
         return buttons;
     };
+    
+    const sortedProducts = sortColumn
+    ? [...PRODUCTS].sort((a, b) => {
+          let aValue = a[sortColumn];
+          let bValue = b[sortColumn];
+
+          if (sortColumn !== 'price') {
+              if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+              if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+              return 0;
+          }
+
+          aValue = parseInt(aValue.match(/\d/g), 10);
+          bValue = parseInt(bValue.match(/\d/g), 10);
+          return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      })
+    : PRODUCTS;
+
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentProducts = PRODUCTS.filter((product) => {
+    const currentProducts = sortedProducts.filter((product) => {
         if (filterText && !product.name.toLowerCase().includes(filterText.toLowerCase())) {
             return false;
         }
@@ -178,7 +226,9 @@ function ProductPaginationTableData({ PRODUCTS, filterText, onlyInStock }) {
 ProductPaginationTableData.propTypes = {
     PRODUCTS: PropTypes.arrayOf(PropTypes.object).isRequired,
     filterText: PropTypes.string,
-    onlyInStock: PropTypes.bool
+    onlyInStock: PropTypes.bool,
+    sortColumn: PropTypes.string,
+    sortDirection: PropTypes.string
 }
 
 function SearchBar({ filterText, onlyInStock, onFilterTextChange, onOnlyInStockChange }) {
@@ -210,13 +260,28 @@ SearchBar.propTypes = {
 function FilterableProductTable() {
     const [onlyInStock, setOnlyInStock] = useState(false);
     const [filterText, setFilterText] = useState('');
+    const [sortColumn, setSortColumn] = useState('name');
+    const [sortDirection, setSortDirection] = useState('asc');
+
+    const handleSort = (column) => {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortColumn(column);
+            setSortDirection('asc');
+        }
+    };
     
     return (
         <div className="flex flex-col">
             <h1 className="text-xl font-bold mb-3">Product Table</h1>
             <SearchBar filterText={filterText} onlyInStock={onlyInStock} onFilterTextChange={setFilterText} onOnlyInStockChange={setOnlyInStock} />
-            {/* <ProductTable header={["Name", "Price"]} products={<ProductCategoryTableData PRODUCTS={PRODUCTS} filterText={filterText} onlyInStock={onlyInStock} />} /> */}
-            <ProductTable header={["Name", "Category", "Price"]} products={<ProductPaginationTableData PRODUCTS={PRODUCTS} filterText={filterText} onlyInStock={onlyInStock} />} />
+            {/* <ProductTable header={["Name", "Price"]} sortColumn={sortColumn} sortDirection={sortDirection} handleSort={handleSort}
+                products={<ProductCategoryTableData PRODUCTS={PRODUCTS} filterText={filterText} onlyInStock={onlyInStock} sortColumn={sortColumn} sortDirection={sortDirection} />} 
+            /> */}
+            <ProductTable header={["Name", "Category", "Price"]} sortColumn={sortColumn} sortDirection={sortDirection} handleSort={handleSort}
+                products={<ProductPaginationTableData PRODUCTS={PRODUCTS} filterText={filterText} onlyInStock={onlyInStock} sortColumn={sortColumn} sortDirection={sortDirection} />} 
+            />
         </div>
     );
 }
